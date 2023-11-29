@@ -4,19 +4,12 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
-        stage('Build') {
-            steps {
-                script {
-                    // Menjalankan Maven untuk membersihkan dan menginstal proyek
-                    sh 'mvn clean install'
-                }
-            }
-        }
         stage('Scan') {
             steps {
                 script {
                     // Menjalankan SonarQube Scanner setelah build berhasil
                     withSonarQubeEnv(installationName: 'sq1') {
+                        sh 'cd scheduler-report'
                         sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes -Dsonar.login=squ_5a104636d6cd8789fb2347311b15e0753d3f3a08'
                     }
                 }
