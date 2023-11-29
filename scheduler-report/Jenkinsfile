@@ -1,32 +1,14 @@
-pipeline {
-    agent any
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
-    stages {
-        stage('Scan') {
+     pipeline {
+        agent none
+        stages {
+         
+          stage("build & sonarqube") {
+            agent any
             steps {
-                script {
-                    // Menjalankan SonarQube Scanner setelah build berhasil
-                    withSonarQubeEnv(installationName: 'sq1') {
-                        sh 'cd scheduler-report'
-                        sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes -Dsonar.login=squ_5a104636d6cd8789fb2347311b15e0753d3f3a08'
-                    }
-                }
+              withSonarQubeEnv('Sona_TOKEN') {
+                sh 'mvn clean package sonar:sonar'
+              }
             }
+          }
         }
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    // Menunggu dan memeriksa status Quality Gate di SonarQube
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Quality Gate failure: ${qg.status}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+      }
